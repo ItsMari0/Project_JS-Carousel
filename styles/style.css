@@ -74,16 +74,23 @@ just for appearance; change whatever you want
     margin: 1em;
 }
 
+.indicators,
 .controls {
     display: flex;
     gap: 1em;
     margin-top: 1em;
 }
 
+.indicator,
 .control {
     display: block;
     border: 1px solid black;
     padding: 0.75em 1em;
     cursor: pointer;
     user-select: none;
+}
+
+.indicator.active {
+    background-color: red;
+    color: white;
 }
