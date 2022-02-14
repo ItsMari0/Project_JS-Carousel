@@ -107,13 +107,19 @@ function swipeEnd(e) {
     if (swipeStartX - swipeEndX > 100) next();
 }
 
-pauseBtn.addEventListener("click", pausePlay);
-prevBtn.addEventListener("click", prev);
-nextBtn.addEventListener("click", next);
-indicatorsContainer.addEventListener('click', indicate);
+function initListener() {
+    pauseBtn.addEventListener("click", pausePlay);
+    prevBtn.addEventListener("click", prev);
+    nextBtn.addEventListener("click", next);
+    indicatorsContainer.addEventListener('click', indicate);
 
-document.addEventListener('keydown', pressKey);
-container.addEventListener('touchstart', swipeStart);
-container.addEventListener('touchend', swipeEnd);
+    document.addEventListener('keydown', pressKey);
+    container.addEventListener('touchstart', swipeStart);
+    container.addEventListener('touchend', swipeEnd);
+}
 
-timerID = setInterval(goToNext, interval);
+function init() {
+    initListener();
+    timerID = setInterval(goToNext, interval);
+}
+init();
