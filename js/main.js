@@ -6,120 +6,127 @@
 <li class="slide">Slide 5</li>
 </ul> */
 //swipe
-const container = document.querySelector('#carousel');
-const slides = container.querySelectorAll(".slide");
-const indicatorsContainer = container.querySelector('#indicators-container')
-const indicators = indicatorsContainer.querySelectorAll('.indicator')
-const pauseBtn = container.querySelector("#pause-btn");
-const prevBtn = container.querySelector("#prev-btn");
-const nextBtn = container.querySelector("#next-btn");
 
+const { pause } = require("browser-sync");
 
+function Carousel() {
+    this.container = document.querySelector('#carousel');
+    this.slides = container.querySelectorAll(".slide");
+    this.indicatorsContainer = this.container.querySelector('#indicators-container')
+    this.indicators = this.indicatorsContainer.querySelectorAll('.indicator')
+    this.pauseBtn = this.container.querySelector("#pause-btn");
+    this.prevBtn = this.container.querySelector("#prev-btn");
+    this.nextBtn = this.container.querySelector("#next-btn");
 
-const SLIDES_COUNT = slides.length;
-const PAUSE = 'Pause';
-const PLAY = 'Play';
-const CODE_LEFT_ARROW = 'ArrowLeft';
-const CODE_RIGHT_ARROW = 'ArrowRight';
-const CODE_SPACE = 'Space';
+    this.SLIDES_COUNT = this.slides.length;
+    this.PAUSE = 'Pause';
+    this.PLAY = 'Play';
+    this.CODE_LEFT_ARROW = 'ArrowLeft';
+    this.CODE_RIGHT_ARROW = 'ArrowRight';
+    this.CODE_SPACE = 'Space';
 
-let currentSlide = 0;
-let isPlaying = true;
-let timerID = null;
-let interval = 2000;
-let swipeStartX = null;
-let swipeEndX = null;
-
-function goToNth(n) {
-    slides[currentSlide].classList.toggle('active');
-    indicators[currentSlide].classList.toggle('active');
-    currentSlide = (n + SLIDES_COUNT) % SLIDES_COUNT;
-    slides[currentSlide].classList.toggle('active');
-    indicators[currentSlide].classList.toggle('active');
+    this.currentSlide = 0;
+    this.isPlaying = true;
+    this.timerID = null;
+    this.interval = 2000;
+    this.swipeStartX = null;
+    this.swipeEndX = null;
 }
 
-function goToPrev() {
-    goToNth(currentSlide - 1);
-}
+Carousel.prototype = {
+    goToNth(n) {
+        this.slides[this.currentSlide].classList.toggle('active');
+        this.indicators[this.currentSlide].classList.toggle('active');
+        this.currentSlide = (n + this.SLIDES_COUNT) % this.SLIDES_COUNT;
+        this.slides[this.currentSlide].classList.toggle('active');
+        this.indicators[this.currentSlide].classList.toggle('active');
+    },
 
-function goToNext() {
-    goToNth(currentSlide + 1);
-}
+    goToPrev() {
+        this.goToNth(this.currentSlide - 1);
+    },
 
-function pause() {
-    isPlaying = false;
-    pauseBtn.innerHTML = PLAY;
-    clearInterval(timerID);
-}
+    goToNext() {
+        this.goToNth(this.currentSlide + 1);
+    },
 
-function play() {
-    isPlaying = true;
-    pauseBtn.innerHTML = PAUSE;
-    timerID = setInterval(goToNext, interval);
-}
+    pause() {
+        this.isPlaying = false;
+        this.pauseBtn.innerHTML = this.PLAY;
+        clearInterval(this.timerID);
+    },
 
-function pausePlay() {
-    if (isPlaying) {
-        pause();
-    } else {
-        play();
+    play() {
+        this.isPlaying = true;
+        this.pauseBtn.innerHTML = this.PAUSE;
+        this.timerID = setInterval(this.goToNext, this.interval);
+    },
+
+    pausePlay() {
+        this.isPlaying ? this.pause() : this.play();
+    },
+
+
+    prev() {
+        this.pause();
+        this.goToPrev();
+    },
+
+    next() {
+        this.pause();
+        this.goToNext();
+    },
+
+    indicate(e) {
+        const target = e.target;
+        if (target.classList.contains('indicator')) {
+            this.pause();
+
+            // console.log(target.getAttribute('data-slide-to')); // выведет строку, т.к значение атрибута это строка;
+            // we can change this construction:
+            // goToNth(Number(target.getAttribute('data-slide-to')));
+            // on this construction:
+            this.goToNth(Number(target.dataset.slideTo));
+        }
+        /* data- ==> dataset;
+            slide-to ==>slideTo;*/
+
+    },
+
+    pressKey(e) {
+        if (e.code === this.CODE_LEFT_ARROW) this.prev();
+        if (e.code === this.CODE_RIGHT_ARROW) this.next();
+        if (e.code === this.CODE_SPACE) this.pausePlay();
+    },
+
+    swipeStart(e) {
+        this.swipeStartX = e.changedTouches[0].pageX;
+    },
+
+    swipeEnd(e) {
+        this.swipeEndX = e.changedTouches[0].pageX;
+        if (this.swipeStartX - this.swipeEndX < -100) this.prev();
+        if (this.swipeStartX - this.swipeEndX > 100) this.next();
+    },
+
+    initListener() {
+        this.pauseBtn.addEventListener("click", this.pausePlay);
+        this.prevBtn.addEventListener("click", this.prev);
+        this.nextBtn.addEventListener("click", this.next);
+        this.indicatorsContainer.addEventListener('click', this.indicate);
+
+        document.addEventListener('keydown', this.pressKey);
+        this.container.addEventListener('touchstart', this.swipeStart);
+        this.container.addEventListener('touchend', this.swipeEnd);
+    },
+
+    init() {
+        this.initListener();
+        this.timerID = setInterval(this.goToNext.bind(this), this.interval);
     }
 }
+Carousel.prototype.construct = Carousel;
+const carousel = new Carousel();
 
-function prev() {
-    pause();
-    goToPrev();
-}
 
-function next() {
-    pause();
-    goToNext();
-}
-
-function indicate(e) {
-    const target = e.target;
-    if (target.classList.contains('indicator')) {
-        pause();
-    }
-    // console.log(target.getAttribute('data-slide-to')); // выведет строку, т.к значение атрибута это строка;
-    // we can change this construction:
-    // goToNth(Number(target.getAttribute('data-slide-to')));
-    // on this construction:
-    goToNth(Number(target.dataset.slideTo));
-    /* data- ==> dataset;
-        slide-to ==>slideTo;*/
-
-}
-
-function pressKey(e) {
-    if (e.code === CODE_LEFT_ARROW) prev();
-    if (e.code === CODE_RIGHT_ARROW) next();
-    if (e.code === CODE_SPACE) pausePlay();
-}
-
-function swipeStart(e) {
-    swipeStartX = e.changedTouches[0].pageX;
-}
-
-function swipeEnd(e) {
-    swipeEndX = e.changedTouches[0].pageX;
-    if (swipeStartX - swipeEndX < -100) prev();
-    if (swipeStartX - swipeEndX > 100) next();
-}
-
-function initListener() {
-    pauseBtn.addEventListener("click", pausePlay);
-    prevBtn.addEventListener("click", prev);
-    nextBtn.addEventListener("click", next);
-    indicatorsContainer.addEventListener('click', indicate);
-
-    document.addEventListener('keydown', pressKey);
-    container.addEventListener('touchstart', swipeStart);
-    container.addEventListener('touchend', swipeEnd);
-}
-
-function init() {
-    initListener();
-    timerID = setInterval(goToNext, interval);
-}
-init();
+carousel.init();
