@@ -7,11 +7,11 @@
 </ul> */
 //swipe
 
-const { pause } = require("browser-sync");
+//const { pause } = require("browser-sync");
 
 function Carousel() {
     this.container = document.querySelector('#carousel');
-    this.slides = container.querySelectorAll(".slide");
+    this.slides = this.container.querySelectorAll(".slide");
     this.indicatorsContainer = this.container.querySelector('#indicators-container')
     this.indicators = this.indicatorsContainer.querySelectorAll('.indicator')
     this.pauseBtn = this.container.querySelector("#pause-btn");
