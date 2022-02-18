@@ -2,7 +2,13 @@
 //const { pause } = require("browser-sync");
 
 
-const carousel = new SwipeCarousel('#slider', '.item');
+const сarousel = new SwipeCarousel({
+    containerID: '#slider',
+    //   slideID: 'item',
+    interval: 1000,
+    //   isPlaying: false,
+    direction: 'backward'
+});
 
 
-carousel.init();
+сarousel.init();
